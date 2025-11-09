@@ -2,6 +2,7 @@ package ollama
 
 import (
 	"bytes"
+	"context"
 	"encoding/json/v2"
 	"fmt"
 	"net/http"
@@ -12,16 +13,23 @@ type Client struct {
 	Model   string
 }
 
-func (c Client) Chat(messages []ChatMessage) (*ResponseStream, error) {
+func (c Client) Chat(ctx context.Context, messages []ChatMessage) (*ResponseStream, error) {
+	think := true
 	p, err := json.Marshal(ChatRequest{
 		Model:    c.Model,
 		Messages: messages,
+		Think:    &think,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", c.BaseURL+"/api/chat", bytes.NewReader(p))
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"POST",
+		c.BaseURL+"/api/chat",
+		bytes.NewReader(p),
+	)
 	if err != nil {
 		return nil, err
 	}

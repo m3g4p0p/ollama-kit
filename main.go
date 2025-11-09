@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json/v2"
 	"flag"
 	"fmt"
@@ -33,7 +34,9 @@ func main() {
 		Model:   options.model,
 	}
 
-	stream, err := client.Chat([]ollama.ChatMessage{{Role: "user", Content: "Say hello world!"}})
+	stream, err := client.Chat(context.Background(), []ollama.ChatMessage{
+		{Role: "user", Content: "Say hello world!"},
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
