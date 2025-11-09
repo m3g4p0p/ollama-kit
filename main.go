@@ -17,21 +17,22 @@ func init() {
 	}
 }
 
-func main() {
+func prompt(args []string) {
 	var options struct {
 		pretty bool
 		raw    bool
 	}
 
-	flag.BoolVar(&options.pretty, "pretty", false, "")
-	flag.BoolVar(&options.raw, "raw", false, "")
+	fs := flag.NewFlagSet("prompt", flag.ExitOnError)
+	fs.BoolVar(&options.pretty, "pretty", false, "")
+	fs.BoolVar(&options.raw, "raw", false, "")
 
 	var chat ollama.ChatRequest
 
-	flag.StringVar(&chat.Model, "model", "qwen3:1.7b", "")
-	flag.BoolVar(&chat.Stream, "stream", true, "")
-	flag.BoolVar(&chat.Think, "think", false, "")
-	flag.Parse()
+	fs.StringVar(&chat.Model, "model", "qwen3:1.7b", "")
+	fs.BoolVar(&chat.Stream, "stream", true, "")
+	fs.BoolVar(&chat.Think, "think", false, "")
+	fs.Parse(args)
 
 	client := ollama.Client{BaseURL: "http://localhost:11434"}
 
@@ -51,4 +52,18 @@ func main() {
 		options.raw,
 		options.pretty,
 	)
+}
+
+var cmds = map[string]func([]string){
+	"prompt": prompt,
+}
+
+func main() {
+	flag.Parse()
+
+	if flag.NArg() == 0 {
+		log.Fatalln("missing command")
+	}
+
+	cmds[flag.Arg(0)](flag.Args()[1:])
 }
