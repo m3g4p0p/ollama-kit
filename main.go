@@ -32,7 +32,8 @@ func main() {
 	var chat ollama.ChatRequest
 
 	flag.StringVar(&chat.Model, "model", "qwen3:1.7b", "")
-	flag.BoolVar(&chat.Think, "think", true, "")
+	flag.BoolVar(&chat.Stream, "stream", true, "")
+	flag.BoolVar(&chat.Think, "think", false, "")
 	flag.Parse()
 
 	client := ollama.Client{BaseURL: "http://localhost:11434"}
