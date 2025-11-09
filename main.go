@@ -2,14 +2,11 @@ package main
 
 import (
 	"context"
-	"encoding/json/v2"
 	"flag"
-	"fmt"
 	"log"
-	"os"
 
+	"m3g4p0p/agents/console"
 	"m3g4p0p/agents/ollama"
-	"m3g4p0p/agents/util"
 
 	"github.com/joho/godotenv"
 )
@@ -47,23 +44,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer stream.Close()
 
-	for part := range stream.Iter() {
-		if options.raw {
-			if options.pretty {
-				util.PrettyDumpJSON(os.Stdout, part)
-			} else {
-				json.MarshalWrite(os.Stdout, part)
-			}
-
-			fmt.Fprintln(os.Stdout)
-		} else {
-			if part.Message.Content != "" {
-				fmt.Printf("\033[1m%s\033[0m", part.Message.Content)
-			}
-			if part.Message.Thinking != "" {
-				fmt.Print(part.Message.Thinking)
-			}
-		}
-	}
+	console.WriteStream(
+		stream,
+		options.raw,
+		options.pretty,
+	)
 }
