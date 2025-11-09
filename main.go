@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"m3g4p0p/agents/ollama"
@@ -16,8 +17,12 @@ func init() {
 
 func main() {
 	client := ollama.Client{BaseURL: "http://localhost:11434", Model: "qwen3:1.7b"}
-	err := client.Chat([]ollama.ChatMessage{{Role: "user", Content: "Say hello world!"}})
+	stream, err := client.Chat([]ollama.ChatMessage{{Role: "user", Content: "Say hello world!"}})
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	for part := range stream.Iter() {
+		fmt.Print(part.Message.Content)
 	}
 }
