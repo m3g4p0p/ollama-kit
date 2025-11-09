@@ -1,0 +1,9 @@
+
+Todo:
+  ☐ Client options
+    ☐ HTTP client
+  ☐ Tool calls
+  ☐ Parse thinking
+  ☐ Response stream
+    ☐ Consider lock
+    ☐ Recovery / retry
