@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"m3g4p0p/agents/ollama"
+	"m3g4p0p/agents/util"
 
 	"github.com/joho/godotenv"
 )
@@ -21,11 +22,13 @@ func init() {
 
 func main() {
 	var options struct {
-		model string
-		raw   bool
+		model  string
+		pretty bool
+		raw    bool
 	}
 
 	flag.StringVar(&options.model, "model", "qwen3:1.7b", "")
+	flag.BoolVar(&options.pretty, "pretty", false, "")
 	flag.BoolVar(&options.raw, "raw", false, "")
 	flag.Parse()
 
@@ -43,7 +46,12 @@ func main() {
 
 	for part := range stream.Iter() {
 		if options.raw {
-			json.MarshalWrite(os.Stdout, part)
+			if options.pretty {
+				util.PrettyDumpJSON(os.Stdout, part)
+			} else {
+				json.MarshalWrite(os.Stdout, part)
+			}
+
 			fmt.Fprintln(os.Stdout)
 		} else {
 			if part.Message.Content != "" {
