@@ -46,7 +46,12 @@ func main() {
 			json.MarshalWrite(os.Stdout, part)
 			fmt.Fprintln(os.Stdout)
 		} else {
-			fmt.Print(part.Message.Content)
+			if part.Message.Content != "" {
+				fmt.Printf("\033[1m%s\033[0m", part.Message.Content)
+			}
+			if part.Message.Thinking != "" {
+				fmt.Print(part.Message.Thinking)
+			}
 		}
 	}
 }
