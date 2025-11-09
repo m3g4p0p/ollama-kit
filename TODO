@@ -7,4 +7,5 @@ Todo:
   ☐ Response stream
     ✘ Consider lock @cancelled(25-11-09 11:18)
     ☐ Recovery / retry
-    ☐ Stream errors
+    ☐ Handle stream errors
+  ☐ Config parser

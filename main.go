@@ -22,24 +22,27 @@ func init() {
 
 func main() {
 	var options struct {
-		model  string
 		pretty bool
 		raw    bool
 	}
 
-	flag.StringVar(&options.model, "model", "qwen3:1.7b", "")
 	flag.BoolVar(&options.pretty, "pretty", false, "")
 	flag.BoolVar(&options.raw, "raw", false, "")
+
+	var chat ollama.ChatRequest
+
+	flag.StringVar(&chat.Model, "model", "qwen3:1.7b", "")
+	flag.BoolVar(&chat.Think, "think", true, "")
 	flag.Parse()
 
-	client := ollama.Client{
-		BaseURL: "http://localhost:11434",
-		Model:   options.model,
-	}
+	client := ollama.Client{BaseURL: "http://localhost:11434"}
 
-	stream, err := client.Chat(context.Background(), []ollama.ChatMessage{
-		{Role: "user", Content: "Say hello world!"},
+	chat.Messages = append(chat.Messages, ollama.ChatMessage{
+		Role:    "user",
+		Content: "Say hello world!",
 	})
+
+	stream, err := client.Chat(context.Background(), chat)
 	if err != nil {
 		log.Fatal(err)
 	}

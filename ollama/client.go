@@ -10,16 +10,10 @@ import (
 
 type Client struct {
 	BaseURL string
-	Model   string
 }
 
-func (c Client) Chat(ctx context.Context, messages []ChatMessage) (*ResponseStream, error) {
-	think := true
-	p, err := json.Marshal(ChatRequest{
-		Model:    c.Model,
-		Messages: messages,
-		Think:    &think,
-	})
+func (c Client) Chat(ctx context.Context, chat ChatRequest) (*ResponseStream, error) {
+	p, err := json.Marshal(chat)
 	if err != nil {
 		return nil, err
 	}

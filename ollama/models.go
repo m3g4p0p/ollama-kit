@@ -8,7 +8,7 @@ type ChatMessage struct {
 type ChatRequest struct {
 	Model    string         `json:"model"`
 	Messages []ChatMessage  `json:"messages"`
-	Think    *bool          `json:"think,omitempty"`
+	Think    bool           `json:"think"`
 	Stream   *bool          `json:"stream,omitempty"`
 	Options  map[string]any `json:"options,omitempty"`
 }
