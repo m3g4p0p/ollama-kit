@@ -10,7 +10,7 @@ import (
 
 type toolset struct {
 	tools    []ollama.Tool
-	handlers map[string]func(any) string
+	handlers map[string]func([]byte) string
 }
 
 type toolOption func(t *toolset)
@@ -31,9 +31,9 @@ func WithTool[T any](name, description string, handler func(T) string) toolOptio
 			},
 		})
 
-		t.handlers[name] = func(a any) string {
+		t.handlers[name] = func(raw []byte) string {
 			var args T
-			json.Unmarshal(a.([]byte), &args)
+			json.Unmarshal(raw, &args)
 			return handler(args)
 		}
 	}

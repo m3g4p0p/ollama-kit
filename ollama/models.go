@@ -1,5 +1,7 @@
 package ollama
 
+import "encoding/json"
+
 type ChatMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -39,8 +41,8 @@ type ToolFunction struct {
 
 type ToolCall struct {
 	Function struct {
-		Name        string `json:"name"`
-		Description string `json:"description,omitempty"`
-		Arguments   any    `json:"arguments,omitempty"`
+		Name        string          `json:"name"`
+		Description string          `json:"description,omitempty"`
+		Arguments   json.RawMessage `json:"arguments,omitempty"`
 	} `json:"function"`
 }
