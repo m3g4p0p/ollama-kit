@@ -7,6 +7,7 @@ import (
 
 	"m3g4p0p/agents/console"
 	"m3g4p0p/agents/ollama"
+	"m3g4p0p/agents/runner"
 	"m3g4p0p/agents/tools"
 
 	"github.com/joho/godotenv"
@@ -51,14 +52,16 @@ func prompt(args []string) {
 		Content: fs.Arg(0),
 	})
 
-	stream, err := client.Chat(context.Background(), chat)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stream.Close()
+	run := runner.Run(client, chat, runner.WithTool(
+		"get_weather",
+		"Get the weather for the provided location",
+		func(params tools.GetWeatherParams) string {
+			return "sunny"
+		},
+	))
 
 	console.WriteStream(
-		stream,
+		run.Stream(context.Background()),
 		options.raw,
 		options.pretty,
 	)

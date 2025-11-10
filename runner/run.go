@@ -29,7 +29,6 @@ func (r *RunStream) Stream(ctx context.Context) iter.Seq[ollama.ChatResponse] {
 			defer stream.Close()
 
 			var message ollama.ChatMessage
-			var toolResults []string
 
 			for part := range stream.Iter() {
 				if !yield(part) {
@@ -38,17 +37,7 @@ func (r *RunStream) Stream(ctx context.Context) iter.Seq[ollama.ChatResponse] {
 
 				message.Role = part.Message.Role
 				message.Content += part.Message.Content
-
-				if part.Message.ToolCalls == nil {
-					continue
-				}
-
-				for _, call := range part.Message.ToolCalls {
-					message.ToolCalls = append(message.ToolCalls, call)
-					handler := r.toolset.handlers[call.Function.Name]
-					content := handler(call.Function.Arguments)
-					toolResults = append(toolResults, content)
-				}
+				message.ToolCalls = append(message.ToolCalls, part.Message.ToolCalls...)
 
 				if !part.Done {
 					continue
@@ -56,11 +45,14 @@ func (r *RunStream) Stream(ctx context.Context) iter.Seq[ollama.ChatResponse] {
 
 				r.chat.Messages = append(r.chat.Messages, message)
 
-				if len(toolResults) == 0 {
+				if len(message.ToolCalls) == 0 {
 					return
 				}
 
-				for _, result := range toolResults {
+				for _, call := range message.ToolCalls {
+					handler := r.toolset.handlers[call.Function.Name]
+					result := handler(call.Function.Arguments)
+
 					r.chat.Messages = append(
 						r.chat.Messages,
 						ollama.ChatMessage{Role: "tool", Content: result},
@@ -76,7 +68,7 @@ func Run(
 	chat ollama.ChatRequest,
 	options ...ToolOption,
 ) *RunStream {
-	var toolset Toolset
+	toolset := Toolset{handlers: make(map[string]handlerFunc)}
 
 	for _, opt := range options {
 		opt(&toolset)

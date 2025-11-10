@@ -8,9 +8,11 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 )
 
+type handlerFunc func([]byte) string
+
 type Toolset struct {
 	tools    []ollama.Tool
-	handlers map[string]func([]byte) string
+	handlers map[string]handlerFunc
 }
 
 type ToolOption func(t *Toolset)
