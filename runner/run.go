@@ -59,6 +59,11 @@ func (r *RunStream) Stream(ctx context.Context) iter.Seq[ollama.ChatResponse] {
 					)
 				}
 			}
+
+			if err := stream.Err(); err != nil {
+				r.err = err
+				return
+			}
 		}
 	}
 }
