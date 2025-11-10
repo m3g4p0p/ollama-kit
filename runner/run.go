@@ -44,6 +44,7 @@ func (r *RunStream) Stream(ctx context.Context) iter.Seq[ollama.ChatResponse] {
 				}
 
 				for _, call := range part.Message.ToolCalls {
+					message.ToolCalls = append(message.ToolCalls, call)
 					handler := r.toolset.handlers[call.Function.Name]
 					content := handler(call.Function.Arguments)
 					toolResults = append(toolResults, content)
