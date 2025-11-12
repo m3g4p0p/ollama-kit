@@ -15,31 +15,49 @@ type Toolset struct {
 	handlers map[string]handlerFunc
 }
 
+func NewToolset(options ...ToolOption) *Toolset {
+	toolset := &Toolset{handlers: make(map[string]handlerFunc)}
+
+	for _, opt := range options {
+		opt(toolset)
+	}
+
+	return toolset
+}
+
+func AddTool[T any](t *Toolset, name, description string, handler func(T) string) error {
+	schema, err := jsonschema.For[T](&jsonschema.ForOptions{})
+	if err != nil {
+		return err
+	}
+
+	t.tools = append(t.tools, ollama.Tool{
+		Type: "function",
+		Function: ollama.ToolFunction{
+			Name:        name,
+			Description: description,
+			Parameters:  schema,
+		},
+	})
+
+	t.handlers[name] = func(raw []byte) string {
+		var args T
+		err := json.Unmarshal(raw, &args)
+		if err != nil {
+			return err.Error()
+		}
+		return handler(args)
+	}
+
+	return nil
+}
+
 type ToolOption func(t *Toolset)
 
 func WithTool[T any](name, description string, handler func(T) string) ToolOption {
-	schema, err := jsonschema.For[T](&jsonschema.ForOptions{})
-	if err != nil {
-		panic(err)
-	}
-
 	return func(t *Toolset) {
-		t.tools = append(t.tools, ollama.Tool{
-			Type: "function",
-			Function: ollama.ToolFunction{
-				Name:        name,
-				Description: description,
-				Parameters:  schema,
-			},
-		})
-
-		t.handlers[name] = func(raw []byte) string {
-			var args T
-			err := json.Unmarshal(raw, &args)
-			if err != nil {
-				return err.Error()
-			}
-			return handler(args)
+		if err := AddTool(t, name, description, handler); err != nil {
+			panic(err)
 		}
 	}
 }
