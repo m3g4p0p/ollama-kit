@@ -52,19 +52,28 @@ func prompt(args []string) {
 		Content: fs.Arg(0),
 	})
 
-	run := runner.Run(client, chat, runner.WithTool(
-		"get_weather",
-		"Get the weather for the provided location",
-		func(params tools.GetWeatherParams) string {
-			return "sunny"
-		},
-	))
+	run := runner.Run(
+		context.Background(),
+		client,
+		chat,
+		runner.WithTool(
+			"get_weather",
+			"Get the weather for the provided location",
+			func(params tools.GetWeatherParams) string {
+				return "sunny"
+			},
+		),
+	)
 
 	console.WriteStream(
-		run.Stream(context.Background()),
+		run.Stream(),
 		options.raw,
 		options.pretty,
 	)
+
+	if err := run.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 var cmds = map[string]func([]string){
