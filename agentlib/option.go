@@ -1,6 +1,7 @@
 package agentlib
 
 import (
+	"m3g4p0p/agents/agentlib/history"
 	"m3g4p0p/agents/ollama"
 	"m3g4p0p/agents/toolset"
 )
@@ -25,6 +26,12 @@ func WithInstructions(instructions string) Option {
 		} else {
 			a.chat.Messages = append([]ollama.ChatMessage{msg}, a.chat.Messages...)
 		}
+	}
+}
+
+func WithHistoryProcessr(processor history.Processor) Option {
+	return func(a *Agent) {
+		a.processer = processor
 	}
 }
 
