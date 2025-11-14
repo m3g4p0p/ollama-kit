@@ -2,6 +2,13 @@ package ollama
 
 import "encoding/json"
 
+type ChatConfig struct {
+	Model   string         `json:"model"`
+	Think   bool           `json:"think"`
+	Stream  bool           `json:"stream"`
+	Options map[string]any `json:"options,omitempty"`
+}
+
 type ChatMessage struct {
 	Role      string     `json:"role"`
 	Content   string     `json:"content"`
@@ -9,12 +16,9 @@ type ChatMessage struct {
 }
 
 type ChatRequest struct {
-	Model    string         `json:"model"`
-	Messages []ChatMessage  `json:"messages"`
-	Think    bool           `json:"think"`
-	Stream   bool           `json:"stream"`
-	Tools    []Tool         `json:"tools,omitempty"`
-	Options  map[string]any `json:"options,omitempty"`
+	ChatConfig
+	Messages []ChatMessage `json:"messages"`
+	Tools    []Tool        `json:"tools,omitempty"`
 }
 
 type ChatResponse struct {

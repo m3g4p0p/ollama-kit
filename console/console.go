@@ -29,4 +29,6 @@ func WriteStream(stream iter.Seq[ollama.ChatResponse], raw, pretty bool) {
 			}
 		}
 	}
+
+	fmt.Println()
 }

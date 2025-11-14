@@ -29,16 +29,16 @@ func prompt(args []string) {
 	fs.BoolVar(&options.pretty, "pretty", false, "")
 	fs.BoolVar(&options.raw, "raw", false, "")
 
-	var chat ollama.ChatRequest
+	var config ollama.ChatConfig
 
-	fs.StringVar(&chat.Model, "model", "qwen3:1.7b", "")
-	fs.BoolVar(&chat.Stream, "stream", true, "")
-	fs.BoolVar(&chat.Think, "think", false, "")
+	fs.StringVar(&config.Model, "model", "qwen3:1.7b", "")
+	fs.BoolVar(&config.Stream, "stream", true, "")
+	fs.BoolVar(&config.Think, "think", false, "")
 	fs.Parse(args)
 
 	agent := agentlib.NewAgent(
 		ollama.Client{BaseURL: "http://localhost:11434"},
-		agentlib.WithChatRequest(chat),
+		agentlib.WithChatConfig(config),
 		agentlib.WithTool(
 			"get_weather",
 			"Get the weather for the provided location",

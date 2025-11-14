@@ -7,9 +7,9 @@ import (
 
 type Option func(a *Agent)
 
-func WithChatRequest(cr ollama.ChatRequest) Option {
+func WithChatConfig(config ollama.ChatConfig) Option {
 	return func(a *Agent) {
-		a.chat = cr
+		a.chat.ChatConfig = config
 	}
 }
 
