@@ -77,7 +77,10 @@ func (r *RunStream) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			}
 
 			for _, call := range message.ToolCalls {
-				result := r.toolset.Handle(call)
+				result, err := r.toolset.Handle(call)
+				if err != nil {
+					result = err.Error()
+				}
 
 				r.chat.Messages = append(
 					r.chat.Messages,
@@ -90,6 +93,8 @@ func (r *RunStream) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			r.err = err
 			return
 		}
+
+		stream.Close()
 	}
 }
 

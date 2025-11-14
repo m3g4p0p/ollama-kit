@@ -37,15 +37,6 @@ func prompt(args []string) {
 	fs.BoolVar(&chat.Think, "think", false, "")
 	fs.Parse(args)
 
-	err := tools.AddTool[tools.GetWeatherParams](
-		&chat,
-		"get_weather",
-		"Get the weather for the provided location",
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	client := ollama.Client{BaseURL: "http://localhost:11434"}
 
 	chat.Messages = append(chat.Messages, ollama.ChatMessage{
@@ -60,8 +51,8 @@ func prompt(args []string) {
 		toolset.WithTool(
 			"get_weather",
 			"Get the weather for the provided location",
-			func(params tools.GetWeatherParams) string {
-				return "sunny"
+			func(params tools.GetWeatherParams) (string, error) {
+				return "sunny", nil
 			},
 		),
 	)

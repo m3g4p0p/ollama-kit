@@ -4,6 +4,7 @@ Todo:
     ☐ HTTP client
   ☐ Tool calls
     ☐ Handle tool errors
+    ☐ Retries
   ☐ Parse thinking
   ☐ Response stream
     ✘ Consider lock @cancelled(25-11-09 11:18)
