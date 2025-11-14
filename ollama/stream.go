@@ -58,3 +58,24 @@ func (r *ResponseStream) Iter() iter.Seq[ChatResponse] {
 		}
 	}
 }
+
+func (r *ResponseStream) Accumulate() iter.Seq2[ChatResponse, ChatMessage] {
+	return func(yield func(ChatResponse, ChatMessage) bool) {
+		var msg ChatMessage
+
+		for {
+			part, err := r.Recv()
+			if err != nil {
+				return
+			}
+
+			msg.Role = part.Message.Role
+			msg.Content += part.Message.Content
+			msg.ToolCalls = append(msg.ToolCalls, part.Message.ToolCalls...)
+
+			if !yield(part, msg) {
+				return
+			}
+		}
+	}
+}

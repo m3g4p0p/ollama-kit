@@ -7,6 +7,9 @@ import (
 
 	"m3g4p0p/agents/console"
 	"m3g4p0p/agents/ollama"
+	"m3g4p0p/agents/runner"
+	"m3g4p0p/agents/tools"
+	"m3g4p0p/agents/toolset"
 
 	"github.com/joho/godotenv"
 )
@@ -38,20 +41,31 @@ func prompt(args []string) {
 
 	chat.Messages = append(chat.Messages, ollama.ChatMessage{
 		Role:    "user",
-		Content: "Say hello world!",
+		Content: fs.Arg(0),
 	})
 
-	stream, err := client.Chat(context.Background(), chat)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stream.Close()
+	run := runner.Run(
+		context.Background(),
+		client,
+		chat,
+		toolset.WithTool(
+			"get_weather",
+			"Get the weather for the provided location",
+			func(params tools.GetWeatherParams) (string, error) {
+				return "sunny", nil
+			},
+		),
+	)
 
 	console.WriteStream(
-		stream,
+		run.Stream(),
 		options.raw,
 		options.pretty,
 	)
+
+	if err := run.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 var cmds = map[string]func([]string){
