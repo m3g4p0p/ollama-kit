@@ -15,21 +15,21 @@ type Toolset struct {
 	handlers map[string]handlerFunc
 }
 
-func NewToolset(options ...ToolOption) *Toolset {
-	toolset := &Toolset{handlers: make(map[string]handlerFunc)}
+func NewToolset(options ...ToolOption) Toolset {
+	toolset := Toolset{handlers: make(map[string]handlerFunc)}
 
 	for _, opt := range options {
-		opt(toolset)
+		opt(&toolset)
 	}
 
 	return toolset
 }
 
-func (t *Toolset) Tools() []ollama.Tool {
+func (t Toolset) Tools() []ollama.Tool {
 	return t.tools
 }
 
-func (t *Toolset) Handle(call ollama.ToolCall) (string, error) {
+func (t Toolset) Handle(call ollama.ToolCall) (string, error) {
 	handler := t.handlers[call.Function.Name]
 	return handler(call.Function.Arguments)
 }
