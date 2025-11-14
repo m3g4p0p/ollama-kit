@@ -29,8 +29,9 @@ func (t *Toolset) Tools() []ollama.Tool {
 	return t.tools
 }
 
-func (t *Toolset) Handle(name string, rawArgs []byte) string {
-	return t.handlers[name](rawArgs)
+func (t *Toolset) Handle(call ollama.ToolCall) string {
+	handler := t.handlers[call.Function.Name]
+	return handler(call.Function.Arguments)
 }
 
 func AddTool[T any](t *Toolset, name, description string, handler func(T) string) error {
