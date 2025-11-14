@@ -5,11 +5,10 @@ import (
 	"flag"
 	"log"
 
+	"m3g4p0p/agents/agentlib"
 	"m3g4p0p/agents/console"
 	"m3g4p0p/agents/ollama"
-	"m3g4p0p/agents/runner"
 	"m3g4p0p/agents/tools"
-	"m3g4p0p/agents/toolset"
 
 	"github.com/joho/godotenv"
 )
@@ -37,18 +36,10 @@ func prompt(args []string) {
 	fs.BoolVar(&chat.Think, "think", false, "")
 	fs.Parse(args)
 
-	client := ollama.Client{BaseURL: "http://localhost:11434"}
-
-	chat.Messages = append(chat.Messages, ollama.ChatMessage{
-		Role:    "user",
-		Content: fs.Arg(0),
-	})
-
-	run := runner.Run(
-		context.Background(),
-		client,
-		chat,
-		toolset.WithTool(
+	agent := agentlib.NewAgent(
+		ollama.Client{BaseURL: "http://localhost:11434"},
+		agentlib.WithChatRequest(chat),
+		agentlib.WithTool(
 			"get_weather",
 			"Get the weather for the provided location",
 			func(params tools.GetWeatherParams) (string, error) {
@@ -56,6 +47,8 @@ func prompt(args []string) {
 			},
 		),
 	)
+
+	run := agent.Run(context.Background(), fs.Arg(0))
 
 	console.WriteStream(
 		run.Stream(),
