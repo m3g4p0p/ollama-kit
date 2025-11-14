@@ -9,6 +9,7 @@ import (
 	"m3g4p0p/agents/ollama"
 	"m3g4p0p/agents/runner"
 	"m3g4p0p/agents/tools"
+	"m3g4p0p/agents/toolset"
 
 	"github.com/joho/godotenv"
 )
@@ -56,7 +57,7 @@ func prompt(args []string) {
 		context.Background(),
 		client,
 		chat,
-		runner.WithTool(
+		toolset.WithTool(
 			"get_weather",
 			"Get the weather for the provided location",
 			func(params tools.GetWeatherParams) string {

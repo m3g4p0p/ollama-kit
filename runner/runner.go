@@ -5,19 +5,20 @@ import (
 	"iter"
 
 	"m3g4p0p/agents/ollama"
+	"m3g4p0p/agents/toolset"
 )
 
 type Runner struct {
 	client  ollama.Client
-	toolset *Toolset
+	toolset *toolset.Toolset
 }
 
-func NewRunner(client ollama.Client, toolset *Toolset) Runner {
+func NewRunner(client ollama.Client, toolset *toolset.Toolset) Runner {
 	return Runner{client: client, toolset: toolset}
 }
 
 func (r Runner) Run(ctx context.Context, chat ollama.ChatRequest) *RunStream {
-	chat.Tools = append(chat.Tools, r.toolset.tools...)
+	chat.Tools = append(chat.Tools, r.toolset.Tools()...)
 
 	return &RunStream{
 		ctx:     ctx,
@@ -30,8 +31,8 @@ func (r Runner) Run(ctx context.Context, chat ollama.ChatRequest) *RunStream {
 type RunStream struct {
 	ctx     context.Context
 	client  ollama.Client
+	toolset *toolset.Toolset
 	chat    ollama.ChatRequest
-	toolset *Toolset
 	err     error
 }
 
@@ -76,8 +77,10 @@ func (r *RunStream) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			}
 
 			for _, call := range message.ToolCalls {
-				handler := r.toolset.handlers[call.Function.Name]
-				result := handler(call.Function.Arguments)
+				result := r.toolset.Handle(
+					call.Function.Name,
+					call.Function.Arguments,
+				)
 
 				r.chat.Messages = append(
 					r.chat.Messages,
@@ -97,7 +100,7 @@ func Run(
 	ctx context.Context,
 	client ollama.Client,
 	chat ollama.ChatRequest,
-	options ...ToolOption,
+	options ...toolset.ToolOption,
 ) *RunStream {
-	return NewRunner(client, NewToolset(options...)).Run(ctx, chat)
+	return NewRunner(client, toolset.NewToolset(options...)).Run(ctx, chat)
 }

@@ -1,4 +1,4 @@
-package runner
+package toolset
 
 import (
 	"encoding/json"
@@ -23,6 +23,14 @@ func NewToolset(options ...ToolOption) *Toolset {
 	}
 
 	return toolset
+}
+
+func (t *Toolset) Tools() []ollama.Tool {
+	return t.tools
+}
+
+func (t *Toolset) Handle(name string, rawArgs []byte) string {
+	return t.handlers[name](rawArgs)
 }
 
 func AddTool[T any](t *Toolset, name, description string, handler func(T) string) error {
@@ -50,14 +58,4 @@ func AddTool[T any](t *Toolset, name, description string, handler func(T) string
 	}
 
 	return nil
-}
-
-type ToolOption func(t *Toolset)
-
-func WithTool[T any](name, description string, handler func(T) string) ToolOption {
-	return func(t *Toolset) {
-		if err := AddTool(t, name, description, handler); err != nil {
-			panic(err)
-		}
-	}
 }
