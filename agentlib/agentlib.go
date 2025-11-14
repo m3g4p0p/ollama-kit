@@ -24,7 +24,7 @@ func NewAgent(client ollama.Client, options ...Option) Agent {
 	return agent
 }
 
-func (a Agent) Run(ctx context.Context, prompt string) *runner.RunStream {
+func (a Agent) Run(ctx context.Context, prompt string) *runner.RunResult {
 	msg := ollama.ChatMessage{
 		Role:    "user",
 		Content: prompt,

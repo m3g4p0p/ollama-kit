@@ -55,10 +55,6 @@ func prompt(args []string) {
 		options.raw,
 		options.pretty,
 	)
-
-	if err := run.Err(); err != nil {
-		log.Fatal(err)
-	}
 }
 
 var cmds = map[string]func([]string){
