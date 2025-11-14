@@ -21,10 +21,8 @@ type ChatResponse struct {
 	Model     string `json:"model"`
 	CreatedAt string `json:"created_at"`
 	Message   struct {
-		Role      string     `json:"role"`
-		Content   string     `json:"content"`
-		Thinking  string     `json:"thinking,omitempty"`
-		ToolCalls []ToolCall `json:"tool_calls,omitempty"`
+		ChatMessage
+		Thinking string `json:"thinking,omitempty"`
 	} `json:"message"`
 	Done bool `json:"done"`
 }
