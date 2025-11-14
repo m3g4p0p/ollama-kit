@@ -42,19 +42,27 @@ func prompt(args []string) {
 		agentlib.WithTool(
 			"get_weather",
 			"Get the weather for the provided location",
-			func(params tools.GetWeatherParams) (string, error) {
-				return "sunny", nil
-			},
+			tools.GetWeather,
 		),
 	)
 
-	run := agent.Run(context.Background(), fs.Arg(0))
+	var history []ollama.ChatMessage
 
-	console.WriteStream(
-		run.Stream(),
-		options.raw,
-		options.pretty,
-	)
+	for _, arg := range fs.Args() {
+		run := agent.Run(context.Background(), arg, history)
+
+		console.WriteStream(
+			run.Stream(),
+			options.raw,
+			options.pretty,
+		)
+
+		if err := run.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+		history = run.Messages()
+	}
 }
 
 var cmds = map[string]func([]string){

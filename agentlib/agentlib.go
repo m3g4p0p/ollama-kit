@@ -2,6 +2,7 @@ package agentlib
 
 import (
 	"context"
+	"slices"
 
 	"m3g4p0p/agents/ollama"
 	"m3g4p0p/agents/runner"
@@ -24,12 +25,16 @@ func NewAgent(client ollama.Client, options ...Option) Agent {
 	return agent
 }
 
-func (a Agent) Run(ctx context.Context, prompt string) *runner.RunResult {
+func (a Agent) Run(ctx context.Context, prompt string, history []ollama.ChatMessage) *runner.RunResult {
+	history = slices.DeleteFunc(history, func(msg ollama.ChatMessage) bool {
+		return msg.Role == "system"
+	})
+
 	msg := ollama.ChatMessage{
 		Role:    "user",
 		Content: prompt,
 	}
 
-	a.chat.Messages = append(a.chat.Messages, msg)
+	a.chat.Messages = append(a.chat.Messages, append(history, msg)...)
 	return runner.NewRunner(a.client, a.toolset).Run(ctx, a.chat)
 }
