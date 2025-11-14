@@ -56,16 +56,10 @@ func (r *RunStream) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 		}
 		defer stream.Close()
 
-		var message ollama.ChatMessage
-
-		for part := range stream.Iter() {
+		for part, message := range stream.Accumulate() {
 			if !yield(part) {
 				return
 			}
-
-			message.Role = part.Message.Role
-			message.Content += part.Message.Content
-			message.ToolCalls = append(message.ToolCalls, part.Message.ToolCalls...)
 
 			if !part.Done {
 				continue
