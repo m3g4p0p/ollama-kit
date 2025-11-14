@@ -27,7 +27,7 @@ func NewAgent(client ollama.Client, options ...Option) Agent {
 
 func (a Agent) Run(ctx context.Context, prompt string, history []ollama.ChatMessage) *runner.RunResult {
 	history = slices.DeleteFunc(history, func(msg ollama.ChatMessage) bool {
-		return msg.Role == "system"
+		return msg.Role == "system" || msg.Role == "tool"
 	})
 
 	msg := ollama.ChatMessage{
