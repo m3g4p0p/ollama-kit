@@ -10,8 +10,8 @@ import (
 )
 
 var defaultProcessor = history.Combine(
-	history.RemoveRoles("system", "tool"),
-	history.RemoveToolCalls(),
+	history.DeleteRoles("system", "tool"),
+	history.DeleteToolCalls(),
 )
 
 type Agent struct {
