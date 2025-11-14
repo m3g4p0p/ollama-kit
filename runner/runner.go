@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"iter"
 
 	"m3g4p0p/agents/ollama"
@@ -79,7 +80,7 @@ func (r *RunStream) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			for _, call := range message.ToolCalls {
 				result, err := r.toolset.Handle(call)
 				if err != nil {
-					result = err.Error()
+					result = fmt.Sprintf("Error: %v", err)
 				}
 
 				r.chat.Messages = append(

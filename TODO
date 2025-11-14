@@ -3,7 +3,7 @@ Todo:
   ☐ Client options
     ☐ HTTP client
   ☐ Tool calls
-    ☐ Handle tool errors
+    ✔ Handle tool errors @done(25-11-14 19:27)
     ☐ Retries
   ☐ Parse thinking
   ☐ Response stream
