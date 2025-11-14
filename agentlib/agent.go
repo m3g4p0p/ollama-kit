@@ -2,21 +2,31 @@ package agentlib
 
 import (
 	"context"
-	"slices"
 
+	"m3g4p0p/agents/agentlib/history"
 	"m3g4p0p/agents/ollama"
 	"m3g4p0p/agents/runner"
 	"m3g4p0p/agents/toolset"
 )
 
+var defaultProcessor = history.Combine(
+	history.RemoveRoles("system", "tool"),
+	history.RemoveToolCalls(),
+)
+
 type Agent struct {
-	client  ollama.Client
-	chat    ollama.ChatRequest
-	toolset toolset.Toolset
+	client    ollama.Client
+	chat      ollama.ChatRequest
+	toolset   toolset.Toolset
+	processer history.Processor
 }
 
 func NewAgent(client ollama.Client, options ...Option) Agent {
-	agent := Agent{client: client, toolset: toolset.NewToolset()}
+	agent := Agent{
+		client:    client,
+		toolset:   toolset.NewToolset(),
+		processer: defaultProcessor,
+	}
 
 	for _, opt := range options {
 		opt(&agent)
@@ -26,15 +36,13 @@ func NewAgent(client ollama.Client, options ...Option) Agent {
 }
 
 func (a Agent) Run(ctx context.Context, prompt string, history []ollama.ChatMessage) *runner.RunResult {
-	history = slices.DeleteFunc(history, func(msg ollama.ChatMessage) bool {
-		return msg.Role == "system" || msg.Role == "tool"
-	})
-
 	msg := ollama.ChatMessage{
 		Role:    "user",
 		Content: prompt,
 	}
 
-	a.chat.Messages = append(a.chat.Messages, append(history, msg)...)
+	history = append(a.processer(history), msg)
+	a.chat.Messages = append(a.chat.Messages, history...)
+
 	return runner.NewRunner(a.client, a.toolset).Run(ctx, a.chat)
 }
