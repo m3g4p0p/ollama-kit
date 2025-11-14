@@ -3,6 +3,7 @@ Todo:
   ☐ Client options
     ☐ HTTP client
   ☐ Tool calls
+    ☐ Handle tool errors
   ☐ Parse thinking
   ☐ Response stream
     ✘ Consider lock @cancelled(25-11-09 11:18)
