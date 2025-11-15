@@ -11,15 +11,16 @@ type HandoffParams struct {
 }
 
 func WithHandoff(agent Agent, name, description string) Option {
-	return WithOptions(
-		WithInstructions(HandoffPrefix),
-		WithTool("transfer_to_"+name, description, func(args HandoffParams) (toolset.ToolResult, error) {
+	return WithTool(
+		"transfer_to_"+name,
+		description,
+		func(args HandoffParams) (toolset.ToolResult, error) {
 			args.agent = agent
 
 			return toolset.ToolResult{
 				Args:  args,
 				Final: true,
 			}, nil
-		}),
+		},
 	)
 }
