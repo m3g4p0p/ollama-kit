@@ -12,7 +12,7 @@ import (
 type RunResult struct {
 	ctx     context.Context
 	client  ollama.Client
-	toolset *toolset.Toolset
+	toolset toolset.Toolset
 	chat    ollama.ChatRequest
 	err     error
 }

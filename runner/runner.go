@@ -9,10 +9,10 @@ import (
 
 type Runner struct {
 	client  ollama.Client
-	toolset *toolset.Toolset
+	toolset toolset.Toolset
 }
 
-func NewRunner(client ollama.Client, toolset *toolset.Toolset) Runner {
+func NewRunner(client ollama.Client, toolset toolset.Toolset) Runner {
 	return Runner{client: client, toolset: toolset}
 }
 
