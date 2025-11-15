@@ -9,8 +9,8 @@ import (
 )
 
 type (
-	handlerFunc    func([]byte) (ToolResult, error)
-	Handler[T any] func(T) (string, error)
+	handlerFunc          func([]byte) (ToolResult, error)
+	SimpleHandler[T any] func(T) (string, error)
 )
 
 type ToolResult struct {
@@ -43,7 +43,7 @@ func (t Toolset) Handle(call ollama.ToolCall) (ToolResult, error) {
 	return handler(call.Function.Arguments)
 }
 
-func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) error {
+func AddSimpleTool[T any](t *Toolset, name, description string, handler SimpleHandler[T]) error {
 	err := addToolDef[T](t, name, description)
 	if err != nil {
 		return err

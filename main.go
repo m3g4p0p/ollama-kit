@@ -49,10 +49,12 @@ func prompt(args []string) {
 			context.Background(),
 			client,
 			chat,
-			toolset.WithTool(
-				"get_weather",
-				"Get the weather for the provided location",
-				tools.GetWeather,
+			toolset.NewToolset(
+				toolset.WithSimpleTool(
+					"get_weather",
+					"Get the weather for the provided location",
+					tools.GetWeather,
+				),
 			),
 		)
 
