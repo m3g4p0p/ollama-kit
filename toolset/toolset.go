@@ -10,6 +10,7 @@ import (
 
 type (
 	handlerFunc          func([]byte) (ToolResult, error)
+	Handler[T any]       func(T) (ToolResult, error)
 	SimpleHandler[T any] func(T) (string, error)
 )
 
@@ -43,28 +44,30 @@ func (t Toolset) Handle(call ollama.ToolCall) (ToolResult, error) {
 	return handler(call.Function.Arguments)
 }
 
-func AddSimpleTool[T any](t *Toolset, name, description string, handler SimpleHandler[T]) error {
+func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) error {
 	err := addToolDef[T](t, name, description)
 	if err != nil {
 		return err
 	}
 
 	t.handlers[name] = func(raw []byte) (ToolResult, error) {
-		var result ToolResult
 		var args T
-
 		err := json.Unmarshal(raw, &args)
 		if err != nil {
-			return result, err
+			return ToolResult{}, err
 		}
 
-		result.Args = args
-		result.Content, err = handler(args)
-
-		return result, err
+		return handler(args)
 	}
 
 	return nil
+}
+
+func AddSimpleTool[T any](t *Toolset, name, description string, handler SimpleHandler[T]) error {
+	return AddTool(t, name, description, func(args T) (ToolResult, error) {
+		content, err := handler(args)
+		return ToolResult{Args: args, Content: content}, err
+	})
 }
 
 func AddStructuredOutput[T any](t *Toolset, name, description string) error {
