@@ -56,14 +56,18 @@ func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			}
 
 			for _, call := range message.ToolCalls {
+				var content string
+
 				result, err := r.toolset.Handle(call)
 				if err != nil {
-					result = fmt.Sprintf("Error: %v", err)
+					content = fmt.Sprintf("Error: %v", err)
+				} else {
+					content = result.Content
 				}
 
 				r.chat.Messages = append(
 					r.chat.Messages,
-					ollama.ChatMessage{Role: "tool", Content: result},
+					ollama.ChatMessage{Role: "tool", Content: content},
 				)
 			}
 		}

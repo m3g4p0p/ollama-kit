@@ -8,7 +8,15 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 )
 
-type handlerFunc func([]byte) (string, error)
+type (
+	handlerFunc    func([]byte) (ToolResult, error)
+	Handler[T any] func(T) (string, error)
+)
+
+type ToolResult struct {
+	Content string
+	Final   bool
+}
 
 type Toolset struct {
 	tools    []ollama.Tool
@@ -29,12 +37,12 @@ func (t Toolset) Tools() []ollama.Tool {
 	return t.tools
 }
 
-func (t Toolset) Handle(call ollama.ToolCall) (string, error) {
+func (t Toolset) Handle(call ollama.ToolCall) (ToolResult, error) {
 	handler := t.handlers[call.Function.Name]
 	return handler(call.Function.Arguments)
 }
 
-func AddTool[T any](t *Toolset, name, description string, handler func(T) (string, error)) error {
+func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) error {
 	schema, err := jsonschema.For[T](&jsonschema.ForOptions{})
 	if err != nil {
 		return err
@@ -49,13 +57,17 @@ func AddTool[T any](t *Toolset, name, description string, handler func(T) (strin
 		},
 	})
 
-	t.handlers[name] = func(raw []byte) (string, error) {
+	t.handlers[name] = func(raw []byte) (ToolResult, error) {
 		var args T
+		var tr ToolResult
+
 		err := json.Unmarshal(raw, &args)
 		if err != nil {
-			return "", err
+			return tr, err
 		}
-		return handler(args)
+
+		tr.Content, err = handler(args)
+		return tr, err
 	}
 
 	return nil
