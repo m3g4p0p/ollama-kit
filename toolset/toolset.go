@@ -14,6 +14,7 @@ type (
 )
 
 type ToolResult struct {
+	Args    any
 	Content string
 	Final   bool
 }
@@ -43,6 +44,50 @@ func (t Toolset) Handle(call ollama.ToolCall) (ToolResult, error) {
 }
 
 func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) error {
+	err := addToolDef[T](t, name, description)
+	if err != nil {
+		return err
+	}
+
+	t.handlers[name] = func(raw []byte) (ToolResult, error) {
+		var result ToolResult
+		var args T
+
+		err := json.Unmarshal(raw, &args)
+		if err != nil {
+			return result, err
+		}
+
+		result.Args = args
+		result.Content, err = handler(args)
+
+		return result, err
+	}
+
+	return nil
+}
+
+func AddFinalTool[T any](t *Toolset, name, description string) error {
+	err := addToolDef[T](t, name, description)
+	if err != nil {
+		return err
+	}
+
+	t.handlers[name] = func(raw []byte) (ToolResult, error) {
+		var args T
+		err := json.Unmarshal(raw, &args)
+		if err != nil {
+			return ToolResult{}, err
+		}
+
+		result := ToolResult{Final: true, Args: args}
+		return result, nil
+	}
+
+	return nil
+}
+
+func addToolDef[T any](t *Toolset, name, description string) error {
 	schema, err := jsonschema.For[T](&jsonschema.ForOptions{})
 	if err != nil {
 		return err
@@ -56,19 +101,6 @@ func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) er
 			Parameters:  schema,
 		},
 	})
-
-	t.handlers[name] = func(raw []byte) (ToolResult, error) {
-		var args T
-		var tr ToolResult
-
-		err := json.Unmarshal(raw, &args)
-		if err != nil {
-			return tr, err
-		}
-
-		tr.Content, err = handler(args)
-		return tr, err
-	}
 
 	return nil
 }

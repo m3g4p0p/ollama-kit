@@ -14,11 +14,16 @@ type RunResult struct {
 	client  ollama.Client
 	toolset toolset.Toolset
 	chat    ollama.ChatRequest
+	output  any
 	err     error
 }
 
 func (r *RunResult) Err() error {
 	return r.err
+}
+
+func (r *RunResult) Output() any {
+	return r.output
 }
 
 func (r *RunResult) Messages() []ollama.ChatMessage {
@@ -63,6 +68,11 @@ func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 					content = fmt.Sprintf("Error: %v", err)
 				} else {
 					content = result.Content
+				}
+
+				if result.Final {
+					r.output = result.Args
+					return
 				}
 
 				r.chat.Messages = append(
