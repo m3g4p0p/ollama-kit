@@ -10,9 +10,9 @@ func WithTool[T any](name, description string, handler func(T) (string, error)) 
 	}
 }
 
-func WithFinalTool[T any](name, description string) ToolOption {
+func WithStructuredOutput[T any](name, description string) ToolOption {
 	return func(t *Toolset) {
-		if err := AddFinalTool[T](t, name, description); err != nil {
+		if err := AddStructuredOutput[T](t, name, description); err != nil {
 			panic(err)
 		}
 	}
