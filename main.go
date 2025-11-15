@@ -36,8 +36,10 @@ func prompt(args []string) {
 	fs.BoolVar(&config.Think, "think", false, "")
 	fs.Parse(args)
 
-	agent := agentlib.NewAgent(
-		ollama.Client{BaseURL: "http://localhost:11434"},
+	client := ollama.Client{BaseURL: "http://localhost:11434"}
+
+	weather_agent := agentlib.NewAgent(
+		client,
 		agentlib.WithChatConfig(config),
 		agentlib.WithSimpleTool(
 			"get_weather",
@@ -46,10 +48,21 @@ func prompt(args []string) {
 		),
 	)
 
+	agent := agentlib.NewAgent(
+		client,
+		agentlib.WithChatConfig(config),
+		agentlib.WithInstructions(agentlib.HandoffPrefix),
+		agentlib.WithHandoff(
+			weather_agent,
+			"weather_agent",
+			"Handles weather forecasts for you",
+		),
+	)
+
 	var history []ollama.ChatMessage
 
 	for _, arg := range fs.Args() {
-		run := agent.Run(context.Background(), arg, history)
+		run := agent.RunPrompt(context.Background(), arg, history)
 
 		console.WriteStream(
 			run.Stream(),

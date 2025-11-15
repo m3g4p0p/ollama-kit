@@ -25,7 +25,7 @@ func (r *AgentRunResult) Stream() iter.Seq[ollama.ChatResponse] {
 				return
 			}
 
-			*r = *handoff.agent.Run(r.Context(), handoff.Prompt, nil)
+			*r = *handoff.agent.Run(r.Context(), r.Messages())
 		}
 	}
 }
