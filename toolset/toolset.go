@@ -67,7 +67,7 @@ func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) er
 	return nil
 }
 
-func AddFinalTool[T any](t *Toolset, name, description string) error {
+func AddStructuredOutput[T any](t *Toolset, name, description string) error {
 	err := addToolDef[T](t, name, description)
 	if err != nil {
 		return err
