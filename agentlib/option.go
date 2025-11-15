@@ -37,6 +37,14 @@ func WithModel(model string) Option {
 	}
 }
 
+func WithOptions(options ...Option) Option {
+	return func(a *Agent) {
+		for _, opt := range options {
+			opt(a)
+		}
+	}
+}
+
 func WithStream(stream bool) Option {
 	return func(a *Agent) {
 		a.chat.Stream = stream
