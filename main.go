@@ -39,7 +39,7 @@ func prompt(args []string) {
 	agent := agentlib.NewAgent(
 		ollama.Client{BaseURL: "http://localhost:11434"},
 		agentlib.WithChatConfig(config),
-		agentlib.WithTool(
+		agentlib.WithSimpleTool(
 			"get_weather",
 			"Get the weather for the provided location",
 			tools.GetWeather,
