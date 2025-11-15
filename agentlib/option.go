@@ -21,11 +21,7 @@ func WithInstructions(instructions string) Option {
 			Content: instructions,
 		}
 
-		if len(a.chat.Messages) == 0 {
-			a.chat.Messages = append(a.chat.Messages, msg)
-		} else {
-			a.chat.Messages = append([]ollama.ChatMessage{msg}, a.chat.Messages...)
-		}
+		a.chat.Messages = append(a.chat.Messages, msg)
 	}
 }
 
