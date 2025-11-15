@@ -12,5 +12,20 @@ type AgentRunResult struct {
 }
 
 func (r *AgentRunResult) Stream() iter.Seq[ollama.ChatResponse] {
-	return r.RunResult.Stream()
+	return func(yield func(ollama.ChatResponse) bool) {
+		for {
+			for part := range r.RunResult.Stream() {
+				if !yield(part) {
+					return
+				}
+			}
+
+			handoff, ok := r.Output().(HandoffParams)
+			if !ok {
+				return
+			}
+
+			*r = *handoff.agent.Run(r.Context(), handoff.Prompt, nil)
+		}
+	}
 }

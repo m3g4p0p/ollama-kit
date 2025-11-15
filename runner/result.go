@@ -18,6 +18,10 @@ type RunResult struct {
 	err     error
 }
 
+func (r *RunResult) Context() context.Context {
+	return r.ctx
+}
+
 func (r *RunResult) Err() error {
 	return r.err
 }
