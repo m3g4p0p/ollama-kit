@@ -2,7 +2,6 @@ package toolset
 
 import (
 	"context"
-	"encoding/json/v2"
 	"os/exec"
 	"strings"
 
@@ -50,17 +49,16 @@ func (t *MCPToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResu
 		return ToolResult{}, err
 	}
 
-	var s strings.Builder
+	var parts []string
 	for _, c := range res.Content {
-		err := json.MarshalWrite(&s, c)
-		if err != nil {
-			return ToolResult{}, err
+		if tc, ok := c.(*mcp.TextContent); ok {
+			parts = append(parts, tc.Text)
 		}
 	}
 
 	return ToolResult{
 		Args:    res.StructuredContent,
-		Content: s.String(),
+		Content: strings.Join(parts, "\n\n"),
 	}, nil
 }
 
