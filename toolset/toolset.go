@@ -8,6 +8,8 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 )
 
+var NewToolset = NewFunctionToolset
+
 type (
 	handlerFunc          func([]byte) (ToolResult, error)
 	Handler[T any]       func(T) (ToolResult, error)
@@ -20,13 +22,18 @@ type ToolResult struct {
 	Final   bool
 }
 
-type Toolset struct {
+type Toolset interface {
+	Tools() []ollama.Tool
+	Handle(call ollama.ToolCall) (ToolResult, error)
+}
+
+type FunctionToolset struct {
 	tools    []ollama.Tool
 	handlers map[string]handlerFunc
 }
 
-func NewToolset(options ...ToolOption) Toolset {
-	toolset := Toolset{handlers: make(map[string]handlerFunc)}
+func NewFunctionToolset(options ...ToolOption) Toolset {
+	toolset := FunctionToolset{handlers: make(map[string]handlerFunc)}
 
 	for _, opt := range options {
 		opt(&toolset)
@@ -35,16 +42,16 @@ func NewToolset(options ...ToolOption) Toolset {
 	return toolset
 }
 
-func (t Toolset) Tools() []ollama.Tool {
+func (t FunctionToolset) Tools() []ollama.Tool {
 	return t.tools
 }
 
-func (t Toolset) Handle(call ollama.ToolCall) (ToolResult, error) {
+func (t FunctionToolset) Handle(call ollama.ToolCall) (ToolResult, error) {
 	handler := t.handlers[call.Function.Name]
 	return handler(call.Function.Arguments)
 }
 
-func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) error {
+func AddTool[T any](t *FunctionToolset, name, description string, handler Handler[T]) error {
 	err := addToolDef[T](t, name, description)
 	if err != nil {
 		return err
@@ -63,14 +70,14 @@ func AddTool[T any](t *Toolset, name, description string, handler Handler[T]) er
 	return nil
 }
 
-func AddSimpleTool[T any](t *Toolset, name, description string, handler SimpleHandler[T]) error {
+func AddSimpleTool[T any](t *FunctionToolset, name, description string, handler SimpleHandler[T]) error {
 	return AddTool(t, name, description, func(args T) (ToolResult, error) {
 		content, err := handler(args)
 		return ToolResult{Args: args, Content: content}, err
 	})
 }
 
-func AddStructuredOutput[T any](t *Toolset, name, description string) error {
+func AddStructuredOutput[T any](t *FunctionToolset, name, description string) error {
 	err := addToolDef[T](t, name, description)
 	if err != nil {
 		return err
@@ -90,7 +97,7 @@ func AddStructuredOutput[T any](t *Toolset, name, description string) error {
 	return nil
 }
 
-func addToolDef[T any](t *Toolset, name, description string) error {
+func addToolDef[T any](t *FunctionToolset, name, description string) error {
 	schema, err := jsonschema.For[T](&jsonschema.ForOptions{})
 	if err != nil {
 		return err
