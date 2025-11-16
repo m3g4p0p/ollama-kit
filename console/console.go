@@ -30,3 +30,8 @@ func WriteStream(stream iter.Seq[ollama.ChatResponse], raw, pretty bool) {
 		}
 	}
 }
+
+func PrettyPrint(value any) error {
+	defer fmt.Fprintln(os.Stdout)
+	return util.PrettyDumpJSON(os.Stdout, value)
+}

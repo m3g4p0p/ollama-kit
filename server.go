@@ -1,5 +1,3 @@
-//go:build ignore
-
 package main
 
 import (
@@ -25,7 +23,7 @@ func SayHi(ctx context.Context, req *mcp.CallToolRequest, input Input) (
 	return nil, Output{Greeting: "Hi " + input.Name}, nil
 }
 
-func main() {
+func server(args []string) {
 	// Create a server with a single tool.
 	server := mcp.NewServer(&mcp.Implementation{Name: "greeter", Version: "v1.0.0"}, nil)
 	mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "say hi"}, SayHi)

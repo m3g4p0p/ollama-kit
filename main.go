@@ -4,11 +4,11 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os/exec"
 
 	"m3g4p0p/agents/console"
 	"m3g4p0p/agents/ollama"
 	"m3g4p0p/agents/runner"
-	"m3g4p0p/agents/tools"
 	"m3g4p0p/agents/toolset"
 
 	"github.com/joho/godotenv"
@@ -37,7 +37,14 @@ func prompt(args []string) {
 	fs.BoolVar(&chat.Think, "think", false, "")
 	fs.Parse(args)
 
+	ctx := context.Background()
 	client := ollama.Client{BaseURL: "http://localhost:11434"}
+
+	session, err := toolset.CreateCommandSession(ctx, exec.Command("go", "run", ".", "server"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
 
 	for _, prompt := range fs.Args() {
 		chat.Messages = append(chat.Messages, ollama.ChatMessage{
@@ -49,13 +56,7 @@ func prompt(args []string) {
 			context.Background(),
 			client,
 			chat,
-			toolset.NewToolset(
-				toolset.WithSimpleTool(
-					"get_weather",
-					"Get the weather for the provided location",
-					tools.GetWeather,
-				),
-			),
+			toolset.NewMCPToolset(session),
 		)
 
 		console.WriteStream(
@@ -74,6 +75,7 @@ func prompt(args []string) {
 
 var cmds = map[string]func([]string){
 	"prompt": prompt,
+	"server": server,
 }
 
 func main() {
