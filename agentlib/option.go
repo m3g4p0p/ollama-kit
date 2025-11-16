@@ -21,11 +21,7 @@ func WithInstructions(instructions string) Option {
 			Content: instructions,
 		}
 
-		if len(a.chat.Messages) == 0 {
-			a.chat.Messages = append(a.chat.Messages, msg)
-		} else {
-			a.chat.Messages = append([]ollama.ChatMessage{msg}, a.chat.Messages...)
-		}
+		a.chat.Messages = append(a.chat.Messages, msg)
 	}
 }
 
@@ -38,6 +34,14 @@ func WithHistoryProcessr(processor history.Processor) Option {
 func WithModel(model string) Option {
 	return func(a *Agent) {
 		a.chat.Model = model
+	}
+}
+
+func WithOptions(options ...Option) Option {
+	return func(a *Agent) {
+		for _, opt := range options {
+			opt(a)
+		}
 	}
 }
 
@@ -56,6 +60,12 @@ func WithThink(think bool) Option {
 func WithTool[T any](name, description string, handler toolset.Handler[T]) Option {
 	return func(a *Agent) {
 		toolset.AddTool(&a.toolset, name, description, handler)
+	}
+}
+
+func WithSimpleTool[T any](name, description string, handler toolset.SimpleHandler[T]) Option {
+	return func(a *Agent) {
+		toolset.AddSimpleTool(&a.toolset, name, description, handler)
 	}
 }
 

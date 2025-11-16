@@ -35,7 +35,7 @@ func NewAgent(client ollama.Client, options ...Option) Agent {
 	return agent
 }
 
-func (a Agent) Run(ctx context.Context, prompt string, history []ollama.ChatMessage) *runner.RunResult {
+func (a Agent) RunPrompt(ctx context.Context, prompt string, history []ollama.ChatMessage) *AgentRunResult {
 	msg := ollama.ChatMessage{
 		Role:    "user",
 		Content: prompt,
@@ -43,6 +43,14 @@ func (a Agent) Run(ctx context.Context, prompt string, history []ollama.ChatMess
 
 	history = append(a.processer(history), msg)
 	a.chat.Messages = append(a.chat.Messages, history...)
+	run := runner.Run(ctx, a.client, a.chat, a.toolset)
 
-	return runner.NewRunner(a.client, a.toolset).Run(ctx, a.chat)
+	return &AgentRunResult{RunResult: run}
+}
+
+func (a Agent) Run(ctx context.Context, history []ollama.ChatMessage) *AgentRunResult {
+	a.chat.Messages = append(a.chat.Messages, a.processer(history)...)
+	run := runner.Run(ctx, a.client, a.chat, a.toolset)
+
+	return &AgentRunResult{RunResult: run}
 }

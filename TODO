@@ -5,6 +5,7 @@ Todo:
   ☐ Tool calls
     ✔ Handle tool errors @done(25-11-14 19:27)
     ☐ Retries
+    ☐ Handle unknown tool
   ☐ Parse thinking
   ☐ Response stream
     ✘ Consider lock @cancelled(25-11-09 11:18)
@@ -14,6 +15,8 @@ Todo:
   ☐ Config parser
   ☐ Agent
     ☐ Handoff
+      ☐ Agent name
+      ☐ Improve history management
     ✔ Chat config @done(25-11-14 22:07)
     ☐ Structerd output
     ✔ History filter @done(25-11-14 23:01)

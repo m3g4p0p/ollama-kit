@@ -31,7 +31,7 @@ func Run(
 	ctx context.Context,
 	client ollama.Client,
 	chat ollama.ChatRequest,
-	options ...toolset.ToolOption,
+	toolset toolset.Toolset,
 ) *RunResult {
-	return NewRunner(client, toolset.NewToolset(options...)).Run(ctx, chat)
+	return NewRunner(client, toolset).Run(ctx, chat)
 }
