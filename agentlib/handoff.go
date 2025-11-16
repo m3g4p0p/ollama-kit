@@ -7,7 +7,6 @@ const HandoffPrefix = "# System context\nYou are part of a multi-agent system, d
 
 type HandoffParams struct {
 	Prompt string
-	agent  Agent
 }
 
 func WithHandoff(agent Agent, name, description string) Option {
@@ -15,11 +14,10 @@ func WithHandoff(agent Agent, name, description string) Option {
 		"transfer_to_"+name,
 		description,
 		func(args HandoffParams) (toolset.ToolResult, error) {
-			args.agent = agent
-
 			return toolset.ToolResult{
-				Args:  args,
-				Final: true,
+				Content: args.Prompt,
+				Args:    agent,
+				Final:   true,
 			}, nil
 		},
 	)
