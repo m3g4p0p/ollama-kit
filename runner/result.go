@@ -37,6 +37,11 @@ func (r *RunResult) Stream() iter.Seq[ollama.ChatResponse] {
 }
 
 func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) bool) {
+	if err := r.appendTools(); err != nil {
+		r.err = err
+		return
+	}
+
 	for {
 		stream, err := r.client.Chat(ctx, r.chat)
 		if err != nil {
@@ -63,7 +68,7 @@ func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			for _, call := range message.ToolCalls {
 				var content string
 
-				result, err := r.toolset.Handle(call)
+				result, err := r.toolset.Handle(r.ctx, call)
 				if err != nil {
 					content = fmt.Sprintf("Error: %v", err)
 				} else {
@@ -89,4 +94,14 @@ func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 
 		stream.Close()
 	}
+}
+
+func (r *RunResult) appendTools() error {
+	tools, err := r.toolset.Tools(r.ctx)
+	if err != nil {
+		return err
+	}
+
+	r.chat.Tools = append(r.chat.Tools, tools...)
+	return nil
 }
