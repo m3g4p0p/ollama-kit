@@ -1,6 +1,7 @@
 package toolset
 
 import (
+	"context"
 	"encoding/json"
 
 	"m3g4p0p/agents/ollama"
@@ -23,8 +24,8 @@ type ToolResult struct {
 }
 
 type Toolset interface {
-	Tools() []ollama.Tool
-	Handle(call ollama.ToolCall) (ToolResult, error)
+	Tools(ctx context.Context) ([]ollama.Tool, error)
+	Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error)
 }
 
 type FunctionToolset struct {
@@ -42,11 +43,11 @@ func NewFunctionToolset(options ...ToolOption) Toolset {
 	return toolset
 }
 
-func (t FunctionToolset) Tools() []ollama.Tool {
-	return t.tools
+func (t FunctionToolset) Tools(ctx context.Context) ([]ollama.Tool, error) {
+	return t.tools, nil
 }
 
-func (t FunctionToolset) Handle(call ollama.ToolCall) (ToolResult, error) {
+func (t FunctionToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error) {
 	handler := t.handlers[call.Function.Name]
 	return handler(call.Function.Arguments)
 }

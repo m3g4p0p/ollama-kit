@@ -17,8 +17,6 @@ func NewRunner(client ollama.Client, toolset toolset.Toolset) Runner {
 }
 
 func (r Runner) Run(ctx context.Context, chat ollama.ChatRequest) *RunResult {
-	chat.Tools = append(chat.Tools, r.toolset.Tools()...)
-
 	return &RunResult{
 		ctx:     ctx,
 		client:  r.client,
