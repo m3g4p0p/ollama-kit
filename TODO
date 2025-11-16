@@ -7,6 +7,8 @@ Todo:
     ☐ Retries
     ☐ Handle unknown tool
     ☐ Pass context
+    ☐ Toolset connection
+    ☐ Error field for llm facing tool errors
   ☐ Parse thinking
   ☐ Response stream
     ✘ Consider lock @cancelled(25-11-09 11:18)
