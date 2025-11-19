@@ -14,3 +14,5 @@ Todo:
     ☐ Handle stream errors
     ✔ Accumulator @done(25-11-14 19:48)
   ☐ Config parser
+  ☐ Run session
+  ☐ Run endpoint

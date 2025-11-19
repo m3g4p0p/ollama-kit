@@ -32,8 +32,8 @@ func NewFunctionToolset(options ...FunctionToolsetOption) *FunctionToolset {
 	return toolset
 }
 
-func (t *FunctionToolset) Tools(ctx context.Context) ([]ollama.Tool, error) {
-	return t.tools, nil
+func (t *FunctionToolset) Tools() []ollama.Tool {
+	return t.tools
 }
 
 func (t *FunctionToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error) {

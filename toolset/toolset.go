@@ -13,6 +13,6 @@ type ToolResult struct {
 }
 
 type Toolset interface {
-	Tools(ctx context.Context) ([]ollama.Tool, error)
+	Tools() []ollama.Tool
 	Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error)
 }
