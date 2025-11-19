@@ -46,6 +46,11 @@ func prompt(args []string) {
 	}
 	defer session.Close()
 
+	mcpToolset := toolset.NewMCPToolset(session)
+	if err := mcpToolset.Connect(ctx); err != nil {
+		log.Fatal(err)
+	}
+
 	for _, prompt := range fs.Args() {
 		chat.Messages = append(chat.Messages, ollama.ChatMessage{
 			Role:    "user",
@@ -56,7 +61,7 @@ func prompt(args []string) {
 			context.Background(),
 			client,
 			chat,
-			toolset.NewMCPToolset(session),
+			mcpToolset,
 		)
 
 		console.WriteStream(

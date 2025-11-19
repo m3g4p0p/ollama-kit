@@ -70,7 +70,7 @@ func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 					content = result.Content
 				}
 
-				if result.Final {
+				if result.Final && err == nil {
 					r.output = result.Args
 					return
 				}
