@@ -11,6 +11,7 @@ import (
 )
 
 type MCPToolset struct {
+	tools   []ollama.Tool
 	session *mcp.ClientSession
 }
 
@@ -18,26 +19,28 @@ func NewMCPToolset(session *mcp.ClientSession) *MCPToolset {
 	return &MCPToolset{session: session}
 }
 
-func (t *MCPToolset) Tools(ctx context.Context) ([]ollama.Tool, error) {
+func (t *MCPToolset) Connect(ctx context.Context) error {
 	res, err := t.session.ListTools(ctx, &mcp.ListToolsParams{})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var tools []ollama.Tool
-
-	for _, t := range res.Tools {
-		tools = append(tools, ollama.Tool{
+	for _, mt := range res.Tools {
+		t.tools = append(t.tools, ollama.Tool{
 			Type: "function",
 			Function: ollama.ToolFunction{
-				Name:        t.Name,
-				Description: t.Description,
-				Parameters:  t.InputSchema,
+				Name:        mt.Name,
+				Description: mt.Description,
+				Parameters:  mt.InputSchema,
 			},
 		})
 	}
 
-	return tools, nil
+	return nil
+}
+
+func (t *MCPToolset) Tools() []ollama.Tool {
+	return t.tools
 }
 
 func (t *MCPToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error) {
