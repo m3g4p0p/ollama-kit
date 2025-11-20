@@ -63,14 +63,14 @@ func (r *RunResult) doRun(ctx context.Context, yield func(ollama.ChatResponse) b
 			for _, call := range message.ToolCalls {
 				var content string
 
-				result, err := r.toolset.Handle(call)
+				result, err := r.toolset.Handle(r.ctx, call)
 				if err != nil {
 					content = fmt.Sprintf("Error: %v", err)
 				} else {
 					content = result.Content
 				}
 
-				if result.Final {
+				if result.Final && err == nil {
 					r.output = result.Args
 					return
 				}
