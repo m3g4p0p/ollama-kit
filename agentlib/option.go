@@ -59,17 +59,17 @@ func WithThink(think bool) Option {
 
 func WithTool[T any](name, description string, handler toolset.Handler[T]) Option {
 	return func(a *Agent) {
-		toolset.AddTool(a.toolset.(*toolset.FunctionToolset), name, description, handler)
+		toolset.AddTool(a.toolset, name, description, handler)
 	}
 }
 
 func WithSimpleTool[T any](name, description string, handler toolset.SimpleHandler[T]) Option {
 	return func(a *Agent) {
-		toolset.AddSimpleTool(a.toolset.(*toolset.FunctionToolset), name, description, handler)
+		toolset.AddSimpleTool(a.toolset, name, description, handler)
 	}
 }
 
-func WithToolset(toolst toolset.Toolset) Option {
+func WithToolset(toolst *toolset.FunctionToolset) Option {
 	return func(a *Agent) {
 		a.toolset = toolst
 	}

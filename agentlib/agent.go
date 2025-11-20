@@ -17,7 +17,7 @@ var defaultProcessor = history.Combine(
 type Agent struct {
 	client    ollama.Client
 	chat      ollama.ChatRequest
-	toolset   toolset.Toolset
+	toolset   *toolset.FunctionToolset
 	processer history.Processor
 }
 
