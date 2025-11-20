@@ -6,6 +6,7 @@ Todo:
     ✔ Handle tool errors @done(25-11-14 19:27)
     ☐ Retries
     ☐ Handle unknown tool
+    ☐ Pass context
   ☐ Parse thinking
   ☐ Response stream
     ✘ Consider lock @cancelled(25-11-09 11:18)
@@ -21,3 +22,5 @@ Todo:
     ☐ Structerd output
     ✔ History filter @done(25-11-14 23:01)
     ☐ Run options
+  ☐ Run session
+  ☐ Run endpoint
