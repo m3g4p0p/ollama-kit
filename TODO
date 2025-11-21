@@ -15,7 +15,7 @@ Todo:
     ☐ Recovery / retry
     ☐ Handle stream errors
     ✔ Accumulator @done(25-11-14 19:48)
-    ☐ Seq2 with error
+    ✔ Seq2 with error @done(25-11-21 20:20)
   ☐ Config parser
   ☐ Run session
   ☐ Run endpoint

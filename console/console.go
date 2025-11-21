@@ -10,8 +10,12 @@ import (
 	"m3g4p0p/agents/util"
 )
 
-func WriteStream(stream iter.Seq[ollama.ChatResponse], raw, pretty bool) {
-	for part := range stream {
+func WriteStream(stream iter.Seq2[ollama.ChatResponse, error], raw, pretty bool) error {
+	for part, err := range stream {
+		if err != nil {
+			return err
+		}
+
 		if raw {
 			if pretty {
 				util.PrettyDumpJSON(os.Stdout, part)
@@ -29,6 +33,8 @@ func WriteStream(stream iter.Seq[ollama.ChatResponse], raw, pretty bool) {
 			}
 		}
 	}
+
+	return nil
 }
 
 func PrettyPrint(value any) error {

@@ -3,7 +3,6 @@ package toolset
 import (
 	"context"
 	"encoding/json"
-
 	"m3g4p0p/agents/ollama"
 
 	"github.com/google/jsonschema-go/jsonschema"
@@ -32,11 +31,11 @@ func NewFunctionToolset(options ...FunctionToolsetOption) *FunctionToolset {
 	return toolset
 }
 
-func (t *FunctionToolset) Tools(ctx context.Context) []ollama.Tool {
+func (t *FunctionToolset) Tools() []ollama.Tool {
 	return t.tools
 }
 
-func (t *FunctionToolset) Handle(call ollama.ToolCall) (ToolResult, error) {
+func (t *FunctionToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error) {
 	handler := t.handlers[call.Function.Name]
 	return handler(call.Function.Arguments)
 }
