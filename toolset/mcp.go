@@ -20,18 +20,17 @@ func NewMCPToolset(session *mcp.ClientSession) *MCPToolset {
 }
 
 func (t *MCPToolset) Connect(ctx context.Context) error {
-	res, err := t.session.ListTools(ctx, &mcp.ListToolsParams{})
-	if err != nil {
-		return err
-	}
+	for tool, err := range t.session.Tools(ctx, &mcp.ListToolsParams{}) {
+		if err != nil {
+			return err
+		}
 
-	for _, mt := range res.Tools {
 		t.tools = append(t.tools, ollama.Tool{
 			Type: "function",
 			Function: ollama.ToolFunction{
-				Name:        mt.Name,
-				Description: mt.Description,
-				Parameters:  mt.InputSchema,
+				Name:        tool.Name,
+				Description: tool.Description,
+				Parameters:  tool.InputSchema,
 			},
 		})
 	}
