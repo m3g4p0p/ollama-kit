@@ -55,6 +55,11 @@ func (r *ResponseStream) Accumulate() iter.Seq2[Accumulation, error] {
 		var msg ChatMessage
 
 		for part, err := range r.Iter() {
+			if err != nil {
+				yield(Accumulation{}, err)
+				return
+			}
+
 			msg.Role = part.Message.Role
 			msg.Content += part.Message.Content
 			msg.ToolCalls = append(msg.ToolCalls, part.Message.ToolCalls...)
