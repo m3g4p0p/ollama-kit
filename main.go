@@ -64,13 +64,12 @@ func prompt(args []string) {
 	for _, arg := range fs.Args() {
 		run := agent.RunPrompt(context.Background(), arg, history)
 
-		console.WriteStream(
+		err := console.WriteStream(
 			run.Stream(),
 			options.raw,
 			options.pretty,
 		)
-
-		if err := run.Err(); err != nil {
+		if err != nil {
 			log.Fatal(err)
 		}
 

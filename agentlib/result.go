@@ -11,11 +11,11 @@ type AgentRunResult struct {
 	*runner.RunResult
 }
 
-func (r *AgentRunResult) Stream() iter.Seq[ollama.ChatResponse] {
-	return func(yield func(ollama.ChatResponse) bool) {
+func (r *AgentRunResult) Stream() iter.Seq2[ollama.ChatResponse, error] {
+	return func(yield func(ollama.ChatResponse, error) bool) {
 		for {
-			for part := range r.RunResult.Stream() {
-				if !yield(part) {
+			for part, err := range r.RunResult.Stream() {
+				if !yield(part, err) || err != nil {
 					return
 				}
 			}

@@ -11,7 +11,11 @@ import (
 type ResponseStream struct {
 	body    io.ReadCloser
 	decoder *jsontext.Decoder
-	err     error
+}
+
+type Accumulation struct {
+	Part    ChatResponse
+	Message ChatMessage
 }
 
 func NewResponseStream(in io.ReadCloser) *ResponseStream {
@@ -21,51 +25,38 @@ func NewResponseStream(in io.ReadCloser) *ResponseStream {
 	}
 }
 
-func (r *ResponseStream) Err() error {
-	if errors.Is(r.err, io.EOF) {
-		return nil
-	}
-
-	return r.err
-}
-
 func (r *ResponseStream) Close() error {
 	return r.body.Close()
 }
 
 func (r *ResponseStream) Recv() (ChatResponse, error) {
 	var part ChatResponse
-
-	if r.err != nil {
-		return part, r.err
-	}
-
 	err := json.UnmarshalDecode(r.decoder, &part)
-	if err != nil {
-		r.err = err
-	}
-
 	return part, err
 }
 
-func (r *ResponseStream) Iter() iter.Seq[ChatResponse] {
-	return func(yield func(ChatResponse) bool) {
+func (r *ResponseStream) Iter() iter.Seq2[ChatResponse, error] {
+	return func(yield func(ChatResponse, error) bool) {
 		for {
 			part, err := r.Recv()
-			if err != nil || !yield(part) {
+			if errors.Is(err, io.EOF) {
+				return
+			}
+
+			if !yield(part, err) || err != nil {
 				return
 			}
 		}
 	}
 }
 
-func (r *ResponseStream) Accumulate() iter.Seq2[ChatResponse, ChatMessage] {
-	return func(yield func(ChatResponse, ChatMessage) bool) {
+func (r *ResponseStream) Accumulate() iter.Seq2[Accumulation, error] {
+	return func(yield func(Accumulation, error) bool) {
 		var msg ChatMessage
 
-		for {
-			part, err := r.Recv()
+		for part, err := range r.Iter() {
 			if err != nil {
+				yield(Accumulation{}, err)
 				return
 			}
 
@@ -73,7 +64,7 @@ func (r *ResponseStream) Accumulate() iter.Seq2[ChatResponse, ChatMessage] {
 			msg.Content += part.Message.Content
 			msg.ToolCalls = append(msg.ToolCalls, part.Message.ToolCalls...)
 
-			if !yield(part, msg) {
+			if !yield(Accumulation{part, msg}, err) {
 				return
 			}
 		}
