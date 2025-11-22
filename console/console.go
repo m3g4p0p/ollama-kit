@@ -18,8 +18,9 @@ import (
 const defaultStyle = "fruity"
 
 type Console struct {
-	out   io.Writer
-	style string
+	out    io.Writer
+	style  string
+	pretty bool
 }
 
 func NewConsole(out io.Writer, options ...util.Option[Console]) *Console {
@@ -29,14 +30,13 @@ func NewConsole(out io.Writer, options ...util.Option[Console]) *Console {
 }
 
 func (c *Console) WriteJSON(v any) error {
-	var s strings.Builder
+	defer fmt.Fprintln(c.out)
 
-	err := json.MarshalWrite(&s, v, jsontext.WithIndent("  "))
-	if err != nil {
-		return err
+	if c.pretty {
+		return c.writePretty(v)
 	}
 
-	return quick.Highlight(c.out, s.String(), "json", "terminal256", c.style)
+	return c.writeRaw(v)
 }
 
 func (c *Console) WriteStream(stream iter.Seq2[ollama.ChatResponse, error], raw, pretty bool) error {
@@ -47,21 +47,36 @@ func (c *Console) WriteStream(stream iter.Seq2[ollama.ChatResponse, error], raw,
 
 		if raw {
 			if pretty {
-				util.PrettyDumpJSON(os.Stdout, part)
+				c.writePretty(part)
 			} else {
-				json.MarshalWrite(os.Stdout, part)
+				c.writeRaw(part)
 			}
 
 			fmt.Fprintln(os.Stdout)
 		} else {
 			if part.Message.Content != "" {
-				fmt.Printf("\033[1m%s\033[0m", part.Message.Content)
+				fmt.Fprintf(c.out, "\033[1m%s\033[0m", part.Message.Content)
 			}
 			if part.Message.Thinking != "" {
-				fmt.Print(part.Message.Thinking)
+				fmt.Fprint(c.out, part.Message.Thinking)
 			}
 		}
 	}
 
 	return nil
+}
+
+func (c *Console) writeRaw(v any) error {
+	return json.MarshalWrite(c.out, v)
+}
+
+func (c *Console) writePretty(v any) error {
+	var s strings.Builder
+
+	err := json.MarshalWrite(&s, v, jsontext.WithIndent("  "))
+	if err != nil {
+		return err
+	}
+
+	return quick.Highlight(c.out, s.String(), "json", "terminal256", c.style)
 }

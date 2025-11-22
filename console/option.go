@@ -7,3 +7,9 @@ func WithStyle(style string) util.Option[Console] {
 		c.style = style
 	}
 }
+
+func WithPretty(pretty bool) util.Option[Console] {
+	return func(c *Console) {
+		c.pretty = pretty
+	}
+}
