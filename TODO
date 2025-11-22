@@ -5,8 +5,8 @@ Todo:
   ☐ Tool calls
     ✔ Handle tool errors @done(25-11-14 19:27)
     ☐ Retries
-    ☐ Handle unknown tool
-    ☐ Pass context
+    ✔ Handle unknown tool @done(25-11-22 19:13)
+    ✔ Pass context @done(25-11-22 19:06)
     ☐ Toolset connection
     ☐ Error field for llm facing tool errors
   ☐ Parse thinking
@@ -15,7 +15,7 @@ Todo:
     ☐ Recovery / retry
     ☐ Handle stream errors
     ✔ Accumulator @done(25-11-14 19:48)
-    ✔ Seq2 with error @done(25-11-21 20:20)
+    ✔ Seq2 with error @done(25-11-21 20:19)
   ☐ Config parser
   ☐ Run session
   ☐ Run endpoint

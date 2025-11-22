@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"m3g4p0p/agents/ollama"
-	"m3g4p0p/agents/toolset"
+	"m3g4p0p/agents/util"
 )
 
 type StructuredRunResult[T any] struct {
@@ -19,8 +19,8 @@ func RunStructured[T any](
 	ctx context.Context,
 	client ollama.Client,
 	chat ollama.ChatRequest,
-	toolset toolset.Toolset,
+	options ...util.Option[Runner],
 ) *StructuredRunResult[T] {
-	r := NewRunner(client, toolset).Run(ctx, chat)
+	r := NewRunner(client, options...).Run(ctx, chat)
 	return &StructuredRunResult[T]{r}
 }

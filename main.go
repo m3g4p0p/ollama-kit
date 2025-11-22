@@ -4,11 +4,13 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
 	"os/exec"
 
 	"m3g4p0p/agents/console"
 	"m3g4p0p/agents/ollama"
 	"m3g4p0p/agents/runner"
+	"m3g4p0p/agents/runner/history"
 	"m3g4p0p/agents/toolset"
 
 	"github.com/joho/godotenv"
@@ -22,11 +24,13 @@ func init() {
 
 func prompt(args []string) {
 	var options struct {
+		style  string
 		pretty bool
 		raw    bool
 	}
 
 	fs := flag.NewFlagSet("prompt", flag.ExitOnError)
+	fs.StringVar(&options.style, "style", "", "")
 	fs.BoolVar(&options.pretty, "pretty", false, "")
 	fs.BoolVar(&options.raw, "raw", false, "")
 
@@ -51,6 +55,18 @@ func prompt(args []string) {
 		log.Fatal(err)
 	}
 
+	processor := history.Combine(
+		history.DeleteRoles("system", "tool"),
+		history.DeleteToolCalls(),
+		history.AddInstructions("You are a helpful pirate. Arrr!"),
+	)
+
+	console := console.NewConsole(
+		os.Stdout,
+		console.WithStyle(options.style),
+		console.WithPretty(options.pretty),
+	)
+
 	for _, prompt := range fs.Args() {
 		chat.Messages = append(chat.Messages, ollama.ChatMessage{
 			Role:    "user",
@@ -61,14 +77,11 @@ func prompt(args []string) {
 			context.Background(),
 			client,
 			chat,
-			mcpToolset,
+			runner.WithToolset(mcpToolset),
+			runner.WithProcessor(processor),
 		)
 
-		err := console.WriteStream(
-			run.Stream(),
-			options.raw,
-			options.pretty,
-		)
+		err := console.WriteStream(run.Stream(), options.raw)
 		if err != nil {
 			log.Fatal(err)
 		}

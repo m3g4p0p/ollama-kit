@@ -1,10 +1,10 @@
 package ollama
 
 import (
-	"bytes"
 	"context"
 	"encoding/json/v2"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -13,17 +13,26 @@ type Client struct {
 }
 
 func (c Client) Chat(ctx context.Context, chat ChatRequest) (*ResponseStream, error) {
-	p, err := json.Marshal(chat)
+	body, err := c.doRequest(ctx, "/api/chat", chat)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(
-		ctx,
-		"POST",
-		c.BaseURL+"/api/chat",
-		bytes.NewReader(p),
-	)
+	return NewResponseStream(body), nil
+}
+
+func (c Client) doRequest(
+	ctx context.Context,
+	path string,
+	data any,
+) (io.ReadCloser, error) {
+	r, w := io.Pipe()
+
+	go func() {
+		w.CloseWithError(json.MarshalWrite(w, data))
+	}()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+path, r)
 	if err != nil {
 		return nil, err
 	}
@@ -37,5 +46,5 @@ func (c Client) Chat(ctx context.Context, chat ChatRequest) (*ResponseStream, er
 		return nil, fmt.Errorf("%s", resp.Status)
 	}
 
-	return NewResponseStream(resp.Body), nil
+	return resp.Body, nil
 }
