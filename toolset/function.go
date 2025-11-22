@@ -12,8 +12,8 @@ import (
 var NewToolset = NewFunctionToolset
 
 type (
-	handlerFunc          func([]byte) (ToolResult, error)
-	Handler[T any]       func(T) (ToolResult, error)
+	handlerFunc          func(context.Context, []byte) (ToolResult, error)
+	Handler[T any]       func(context.Context, T) (ToolResult, error)
 	SimpleHandler[T any] func(T) (string, error)
 )
 
@@ -38,7 +38,7 @@ func (t *FunctionToolset) Tools() []ollama.Tool {
 
 func (t *FunctionToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error) {
 	handler := t.handlers[call.Function.Name]
-	return handler(call.Function.Arguments)
+	return handler(ctx, call.Function.Arguments)
 }
 
 func AddTool[T any](t *FunctionToolset, name, description string, handler Handler[T]) error {
@@ -47,21 +47,21 @@ func AddTool[T any](t *FunctionToolset, name, description string, handler Handle
 		return err
 	}
 
-	t.handlers[name] = func(raw []byte) (ToolResult, error) {
+	t.handlers[name] = func(ctx context.Context, raw []byte) (ToolResult, error) {
 		var args T
 		err := json.Unmarshal(raw, &args)
 		if err != nil {
 			return ToolResult{}, err
 		}
 
-		return handler(args)
+		return handler(ctx, args)
 	}
 
 	return nil
 }
 
 func AddSimpleTool[T any](t *FunctionToolset, name, description string, handler SimpleHandler[T]) error {
-	return AddTool(t, name, description, func(args T) (ToolResult, error) {
+	return AddTool(t, name, description, func(ctx context.Context, args T) (ToolResult, error) {
 		content, err := handler(args)
 		return ToolResult{Args: args, Content: content}, err
 	})
@@ -73,7 +73,7 @@ func AddStructuredOutput[T any](t *FunctionToolset, name, description string) er
 		return err
 	}
 
-	t.handlers[name] = func(raw []byte) (ToolResult, error) {
+	t.handlers[name] = func(ctx context.Context, raw []byte) (ToolResult, error) {
 		var args T
 		err := json.Unmarshal(raw, &args)
 		if err != nil {
