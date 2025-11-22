@@ -3,6 +3,7 @@ package toolset
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"m3g4p0p/agents/ollama"
 
@@ -37,7 +38,10 @@ func (t *FunctionToolset) Tools() []ollama.Tool {
 }
 
 func (t *FunctionToolset) Handle(ctx context.Context, call ollama.ToolCall) (ToolResult, error) {
-	handler := t.handlers[call.Function.Name]
+	handler, ok := t.handlers[call.Function.Name]
+	if !ok {
+		return ToolResult{}, fmt.Errorf("unknown tool %q", call.Function.Name)
+	}
 	return handler(ctx, call.Function.Arguments)
 }
 
