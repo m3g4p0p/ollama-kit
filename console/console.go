@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"iter"
-	"os"
 	"strings"
 
 	"m3g4p0p/agents/ollama"
@@ -39,27 +38,16 @@ func (c *Console) WriteJSON(v any) error {
 	return c.writeRaw(v)
 }
 
-func (c *Console) WriteStream(stream iter.Seq2[ollama.ChatResponse, error], raw, pretty bool) error {
+func (c *Console) WriteStream(stream iter.Seq2[ollama.ChatResponse, error], raw bool) error {
 	for part, err := range stream {
 		if err != nil {
 			return err
 		}
 
 		if raw {
-			if pretty {
-				c.writePretty(part)
-			} else {
-				c.writeRaw(part)
-			}
-
-			fmt.Fprintln(os.Stdout)
+			c.WriteJSON(part)
 		} else {
-			if part.Message.Content != "" {
-				fmt.Fprintf(c.out, "\033[1m%s\033[0m", part.Message.Content)
-			}
-			if part.Message.Thinking != "" {
-				fmt.Fprint(c.out, part.Message.Thinking)
-			}
+			c.writePart(part)
 		}
 	}
 
@@ -79,4 +67,13 @@ func (c *Console) writePretty(v any) error {
 	}
 
 	return quick.Highlight(c.out, s.String(), "json", "terminal256", c.style)
+}
+
+func (c *Console) writePart(part ollama.ChatResponse) {
+	if part.Message.Content != "" {
+		fmt.Fprintf(c.out, "\033[1m%s\033[0m", part.Message.Content)
+	}
+	if part.Message.Thinking != "" {
+		fmt.Fprint(c.out, part.Message.Thinking)
+	}
 }
