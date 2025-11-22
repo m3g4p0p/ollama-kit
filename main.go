@@ -39,6 +39,14 @@ func prompt(args []string) {
 
 	client := ollama.Client{BaseURL: "http://localhost:11434"}
 
+	funcToolset := toolset.NewToolset(
+		toolset.WithSimpleTool(
+			"get_weather",
+			"Get the weather for the provided location",
+			tools.GetWeather,
+		),
+	)
+
 	for _, prompt := range fs.Args() {
 		chat.Messages = append(chat.Messages, ollama.ChatMessage{
 			Role:    "user",
@@ -49,13 +57,7 @@ func prompt(args []string) {
 			context.Background(),
 			client,
 			chat,
-			toolset.NewToolset(
-				toolset.WithSimpleTool(
-					"get_weather",
-					"Get the weather for the provided location",
-					tools.GetWeather,
-				),
-			),
+			runner.WithToolset(funcToolset),
 		)
 
 		err := console.WriteStream(
