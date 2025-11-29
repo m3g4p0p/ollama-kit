@@ -21,7 +21,9 @@ func NewRunner(client ollama.Client, options ...util.Option[Runner]) Runner {
 }
 
 func (r Runner) Run(ctx context.Context, chat ollama.ChatRequest) *RunResult {
-	chat.Tools = append(chat.Tools, r.toolset.Tools()...)
+	if r.toolset != nil {
+		chat.Tools = append(chat.Tools, r.toolset.Tools()...)
+	}
 
 	if r.processor != nil {
 		chat.Messages = r.processor(chat.Messages)
